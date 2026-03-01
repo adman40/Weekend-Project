@@ -75,8 +75,12 @@ WSGI_APPLICATION = 'crimescope.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+         'ENGINE': 'django.db.backends.postgresql',
+         'NAME': 'crimescope',
+         'USER': 'crimescope_user',
+         'PASSWORD': 'Bevo123',
+         'HOST': 'localhost',
+         'PORT': '5432',
     }
 }
 
