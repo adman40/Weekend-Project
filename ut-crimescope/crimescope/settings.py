@@ -46,6 +46,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'crimescope.wsgi.application'
 
+_use_ssl = config('USE_S3', default=False, cast=bool)  # True in production (RDS requires SSL)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -54,6 +55,7 @@ DATABASES = {
         'PASSWORD': config('DB_PASSWORD'),
         'HOST':     config('DB_HOST',     default='localhost'),
         'PORT':     config('DB_PORT',     default='5432'),
+        'OPTIONS':  {'sslmode': 'require'} if _use_ssl else {},
     }
 }
 
