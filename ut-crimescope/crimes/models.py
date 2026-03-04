@@ -29,6 +29,8 @@ class Incident(models.Model):
     )
     campus_zone = models.CharField(max_length=50, blank=True)
     disposition = models.CharField(max_length=200, blank=True)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
     scraped_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -38,9 +40,27 @@ class UserProfile(AbstractUser):
     watched_buildings = models.ManyToManyField(Building, blank=True)
     alert_crime_types = models.CharField(max_length=500, blank=True)
 
+class WatchedLocation(models.Model):
+    RADIUS_CHOICES = [
+        (0.10, 'Within 1 block (~0.1 mi)'),
+        (0.25, 'Within a few blocks (~0.25 mi)'),
+        (0.50, 'Within half a mile'),
+        (1.00, 'Within 1 mile'),
+    ]
+    user         = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='watched_locations')
+    label        = models.CharField(max_length=200)   # the address/name the user typed
+    latitude     = models.FloatField()
+    longitude    = models.FloatField()
+    radius_miles = models.FloatField(choices=RADIUS_CHOICES, default=0.25)
+    created_at   = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.label} ({self.radius_miles} mi) — {self.user.username}"
+
+
 class AlertLog(models.Model):
-    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    user     = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     incident = models.ForeignKey(Incident, on_delete=models.CASCADE)
-    sent_at = models.DateTimeField(auto_now_add=True)
+    sent_at  = models.DateTimeField(auto_now_add=True)
     
     

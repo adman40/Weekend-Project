@@ -1,0 +1,26 @@
+{% extends "crimes/base.html" %}
+{% block content %}
+<h1>{{ building.name }}</h1>
+<p>Zone: {{ building.zone }}</p>
+
+{% if user.is_authenticated %}
+    <form method="post" action="/profile/">
+        {% csrf_token %}
+        <button class="btn btn-outline-dark btn-sm">Watch this building</button>
+    </form>
+{% endif %}
+
+<h3 class="mt-4">Incident History ({{ incidents.count }} total)</h3>
+<table class="table table-sm">
+    <thead><tr><th>Date</th><th>Type</th><th>Disposition</th></tr></thead>
+    <tbody>
+        {% for inc in incidents %}
+        <tr>
+            <td>{{ inc.reported_date }}</td>
+            <td>{{ inc.crime_type }}</td>
+            <td>{{ inc.disposition }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

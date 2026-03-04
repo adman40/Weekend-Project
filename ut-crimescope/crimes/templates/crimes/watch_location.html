@@ -1,0 +1,60 @@
+{% extends "crimes/base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-7">
+    <h2 class="mb-1">Location Alerts</h2>
+    <p class="text-muted mb-4">Get an email whenever a new incident is reported near a location you care about.</p>
+
+    {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+
+    <div class="card mb-5">
+      <div class="card-body">
+        <h5 class="card-title">Watch a new location</h5>
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">{{ form.location_query.label }}</label>
+            {{ form.location_query }}
+            <div class="form-text">Examples: "PCL Library", "Jester Center", "2100 Speedway Ave"</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">{{ form.radius_miles.label }}</label>
+            <select name="radius_miles" class="form-select">
+              {% for value, label in form.fields.radius_miles.choices %}
+              <option value="{{ value }}">{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="btn btn-dark">Add alert</button>
+        </form>
+      </div>
+    </div>
+
+    <h4>Your watched locations</h4>
+    {% if watched %}
+    <table class="table table-sm">
+      <thead><tr><th>Location</th><th>Radius</th><th>Added</th><th></th></tr></thead>
+      <tbody>
+        {% for w in watched %}
+        <tr>
+          <td>{{ w.label }}</td>
+          <td>{{ w.get_radius_miles_display }}</td>
+          <td>{{ w.created_at|date:"M j, Y" }}</td>
+          <td>
+            <form method="post" action="/alerts/remove/{{ w.pk }}/" style="display:inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="text-muted">No locations watched yet.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

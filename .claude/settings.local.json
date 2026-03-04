@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"c:/Users/Andrew/Desktop/Weekend Project/ut-crimescope/crimes/urls.py\":*)",
+      "Bash(source venv/Scripts/activate)",
+      "Bash(python manage.py shell -c \"import crimes.forms; print\\(dir\\(crimes.forms\\)\\)\")"
+    ]
+  }
+}

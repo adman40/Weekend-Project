@@ -1,0 +1,129 @@
+{% extends "crimes/base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>UT Campus Safety Dashboard</h1>
+    <form method="get" class="d-flex gap-2 align-items-center">
+        <select name="crime_type" class="form-select form-select-sm" style="width:auto">
+            <option value="">All Crime Types</option>
+            {% for ct in crime_types %}
+            <option value="{{ ct }}" {% if ct == crime_type_filter %}selected{% endif %}>{{ ct }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-sm btn-dark">Filter</button>
+        {% if crime_type_filter %}
+        <a href="/" class="btn btn-sm btn-outline-secondary">Clear</a>
+        {% endif %}
+    </form>
+</div>
+
+{% if crime_type_filter %}
+<div class="alert alert-secondary py-2">Filtering by: <strong>{{ crime_type_filter }}</strong></div>
+{% endif %}
+
+<h3>Recent Incidents</h3>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Location</th>
+            <th>Disposition</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for inc in incidents %}
+        <tr>
+            <td>{{ inc.reported_date }}</td>
+            <td>{{ inc.crime_type }}</td>
+            <td>{{ inc.location_raw }}</td>
+            <td>{{ inc.disposition }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="/export/" class="btn btn-success mb-4">Download CSV</a>
+
+<div class="mb-2">
+    <div class="btn-group" role="group">
+        <button class="btn btn-sm btn-dark chart-tab" data-target="chart-trend">Weekly Trend</button>
+        <button class="btn btn-sm btn-outline-dark chart-tab" data-target="chart-type">Top Crime Types</button>
+        <button class="btn btn-sm btn-outline-dark chart-tab" data-target="chart-hour">Incidents by Hour</button>
+    </div>
+</div>
+
+<div class="mb-5">
+    <div id="chart-trend"><canvas id="trendChart" height="80"></canvas></div>
+    <div id="chart-type" style="display:none"><canvas id="typeChart" height="80"></canvas></div>
+    <div id="chart-hour" style="display:none"><canvas id="hourChart" height="80"></canvas></div>
+</div>
+
+<h3 class="mt-2">Incident Hot Spots</h3>
+<table class="table table-sm">
+    <thead><tr><th>Location</th><th>Incidents</th></tr></thead>
+    <tbody>
+        {% for spot in hot_spots %}
+        <tr>
+            <td>{{ spot.location_raw }}</td>
+            <td>{{ spot.count }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: {
+        labels: {{ trend_labels|default:"[]"|safe }},
+        datasets: [{ data: {{ trend_data|default:"[]"|safe }},
+                     borderColor: 'rgb(191,87,0)', tension: 0.3, fill: false }]
+    },
+    options: {
+        plugins: { title: { display: true, text: 'Weekly Trend' }, legend: { display: false } },
+        scales: { y: { beginAtZero: true, title: { display: true, text: 'Number of Incidents' } } }
+    }
+});
+new Chart(document.getElementById('typeChart'), {
+    type: 'bar',
+    data: {
+        labels: {{ type_labels|default:"[]"|safe }},
+        datasets: [{ data: {{ type_data|default:"[]"|safe }},
+                     backgroundColor: 'rgb(191,87,0)' }]
+    },
+    options: {
+        plugins: { title: { display: true, text: 'Top Crime Types' }, legend: { display: false } },
+        indexAxis: 'y',
+        scales: { x: { title: { display: true, text: 'Number of Incidents' } } }
+    }
+});
+new Chart(document.getElementById('hourChart'), {
+    type: 'bar',
+    data: {
+        labels: {{ hour_labels|default:"[]"|safe }},
+        datasets: [{ data: {{ hour_data|default:"[]"|safe }},
+                     backgroundColor: 'rgb(191,87,0)' }]
+    },
+    options: {
+        plugins: { title: { display: true, text: 'Incidents by Hour of Day' }, legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
+    }
+});
+
+document.querySelectorAll('.chart-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.chart-tab').forEach(b => {
+            b.className = 'btn btn-sm btn-outline-dark chart-tab';
+        });
+        btn.className = 'btn btn-sm btn-dark chart-tab';
+        ['chart-trend', 'chart-type', 'chart-hour'].forEach(id => {
+            document.getElementById(id).style.display = 'none';
+        });
+        document.getElementById(btn.dataset.target).style.display = '';
+    });
+});
+</script>
+{% endblock %}

@@ -121,3 +121,10 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 AUTH_USER_MODEL = 'crimes.UserProfile'
+
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+# Email — prints to console during development so you can verify alerts work
+# without configuring a real SMTP server. Swap for smtp backend in production.
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
